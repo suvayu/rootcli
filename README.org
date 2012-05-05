@@ -1,0 +1,6 @@
+# -*- mode: org; -*-
+
+* Introduction
+This package provides some very basic ROOT utilities for the terminal.
+
+1. =rootls= - List contents of ROOT files recursively
