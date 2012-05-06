@@ -48,13 +48,27 @@ BINFILES     =  $(BINSRC:%.cc=%)
 #------------------------------------------------------------------------------
 # Rules
 #------------------------------------------------------------------------------
-.PHONY:		all clean
+.PHONY:		all clean # doc website clean-doc
 
 all:		$(BINFILES)
 
 # Binaries
 $(BINFILES): %:	%.cc
 	$(CXX) $(OPT) $(ROOTCFLAGS) $(ROOTLIBS) $< -o $@
+
+# doc:	| $(DOCDIR)
+# 	doxygen rootcli-doxy.conf > /dev/null
+
+# $(DOCDIR):
+# 	mkdir -p $(DOCDIR)
+
+# website:
+# 	cd $(DOCDIR) && \
+# 	  git commit -a -m "Updating documentation" && \
+# 	  git push -f origin gh-pages
+
+# clean-doc:
+# 	rm -rf $(DOCDIR)/html $(DOCDIR)/man
 
 clean:
 	rm -f $(BINFILES)
