@@ -18,9 +18,18 @@
  */
 void browse_dir(TDirectory *dir, bool recurse);
 
+/**
+ * Usage message.
+ *
+ * @param progname Binary name to be used in message
+ *
+ * @return exit code
+ */
+int help_msg(char * progname, int exitcode);
 
-/** 
- * Take ROOT files and input
+
+/**
+ * Take ROOT files and input.
  *
  * @param argc Argument count
  * @param argv Options and ROOT filenames
@@ -30,13 +39,7 @@ void browse_dir(TDirectory *dir, bool recurse);
 int main(int argc, char * argv[])
 {
   if (argc == 1) {
-    std::cout << "Insufficient/incorrect number of arguments."
-	      << std::endl << std::endl;
-    std::cout << "Usage: " << argv[0] << " <ROOT file(s)>"
-	      << std::endl << std::endl;
-    std::cout << "   List contents of the ROOT file(s) recursively."
-	      << std::endl;
-    return 1;
+    return help_msg(argv[0], 1);
   }
 
   // get args
@@ -64,7 +67,7 @@ int main(int argc, char * argv[])
 
   if (files.empty()) {
     std::cout << "ERROR: No ROOT files provided! " << std::endl;
-    return 2;
+    return help_msg(argv[0], 2);
   }
 
   // list files
@@ -95,4 +98,17 @@ void browse_dir(TDirectory * dir, bool recurse)
       }
     }
   }
+}
+
+
+int help_msg(char * progname, int exitcode)
+{
+  std::cout << "ERROR: Insufficient/incorrect number of arguments.\n"
+	    << std::endl;
+  std::cout << "Usage: " << progname << " [-r] <ROOT file(s)>\n"
+	    << std::endl;
+  std::cout << "   List contents of the ROOT file(s).\n"
+	    << std::endl;
+  std::cout << "   -r  Recurse through directories." << std::endl;
+  return exitcode;
 }
