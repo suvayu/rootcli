@@ -1,3 +1,16 @@
+/**
+ * @file   HistUtils.hxx
+ * @author Suvayu Ali <Suvayu.Ali@cern.ch>
+ * @date   Tue May  8 17:25:50 2012
+ *
+ * @brief  This file implements ROOT histogram manipulation tools
+ *
+ *         1. Hist::rescale()
+ *         2. Hist::HistReader - implements a class to read multiple
+ *            ROOT objects matching a regular expression.
+ *
+ */
+
 #ifndef __HISTUTILS_HXX
 #define __HISTUTILS_HXX
 
@@ -5,15 +18,13 @@
 #include <vector>
 
 #include <TH1.h>
-#include <TH2.h>
-#include <TH3.h>
-#include <THnSparse.h>
 #include <TKey.h>
 #include <TClass.h>
 #include <TCollection.h>
 #include <TDirectory.h>
 #include <TString.h>
 #include <TRegexp.h>
+
 
 namespace Hist {
 
@@ -26,6 +37,16 @@ namespace Hist {
   void rescale(TH1 *hist, Double_t factor);
 
 
+  /**
+   * This class provides an interface to read histograms from ROOT
+   * files by matching regular expressions to histogram names. It
+   * recursively looks through subdirectories to find matches. All the
+   * getter methods are templated, so essentially one can also get
+   * other ROOT objects.
+   *
+   * TODO: Port the regex bits to Boost.Regex or Boost.Xpressive
+   *
+   */
   class HistReader {
 
   public:
