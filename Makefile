@@ -12,7 +12,7 @@ ifneq ($(findstring debug, $(strip $(shell $(ROOTCONFIG) --config))),)
 OPT           = -g
 endif
 
-# compile with g++ 
+# compile with g++
 CXX          := $(shell $(ROOTCONFIG) --cxx) -Wall -fPIC
 CXXFLAGS     := -c $(OPT)
 
@@ -24,7 +24,7 @@ SOFLAGS      := -shared
 # ROOT compile flags
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 
-# linking to ROOT 
+# linking to ROOT
 ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
 ROOFITLIBS   := -lRooFitCore -lRooFit
 ROOTGLIBS    := $(shell $(ROOTCONFIG) --glibs)
@@ -37,7 +37,7 @@ ROOTCINT     := rootcint
 #-----------------------------------------------------
 # directories
 #-----------------------------------------------------
-PROJROOT     =  $(PWD)
+PROJROOT     =  .
 INCDIR       =  $(PROJROOT)
 SRCDIR       =  $(PROJROOT)
 LIBDIR       =  $(PROJROOT)
@@ -50,7 +50,7 @@ TESTDIR      =  $(PROJROOT)/tests
 # project source, object, dictionary and lib filenames
 #-----------------------------------------------------
 # libraries
-LIBS         =  
+LIBS         =
 LIBS         += libROOTutils.so
 
 LIBFILES     =  $(LIBS:%=$(LIBDIR)/%)
@@ -62,13 +62,13 @@ LIBSRC       += HistUtils.cxx
 # LIBSRC       += Parsers.cxx
 # LIBSRC       += StyleUtils.cxx
 
-LIBOBJF      =  $(LIBSRC:%.cxx=$(LIBDIR)/%.o)
+LIBOBJF      =  $(LIBSRC:%.cxx=%.o)
 
 # binaries
 BINSRC       =
 BINSRC       += test.cc
 
-BINFILES     =  $(BINSRC:%.cc=$(BINDIR)/%)
+BINFILES     =  $(BINSRC:%.cc=%)
 
 #-----------------------------------------------------
 # canned recipes
@@ -81,31 +81,22 @@ endef
 #------------------------------------------------------------------------------
 # Rules
 #------------------------------------------------------------------------------
-.PHONY:		all clean clean-obj clean-so docs
+.PHONY:		all clean docs
 
 all:		$(LIBFILES) $(BINFILES)
 
 # libraries
-$(LIBDIR)/libROOTutils.so:	$(LIBOBJF) | $(LIBDIR)
+libROOTutils.so:	$(LIBOBJF)
 	$(LINK-LIBS)
 
-$(LIBDIR)/%.o:	$(SRCDIR)/%.cxx #| $(LIBDIR)
+%.o:	%.cxx
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
 
-# $(LIBDIR):
-# 	mkdir -p $(LIBDIR)
-
 # Binaries
-$(BINFILES): $(BINDIR)/%:	$(SRCDIR)/%.cc $(LIBFILES) #| $(BINDIR)
+$(BINFILES): %:	%.cc $(LIBFILES)
 	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lROOTutils $< -o $@
 
-# $(BINDIR):
-# 	mkdir -p $(BINDIR)
-
-clean:		clean-obj clean-so
-
-clean-obj:
-	rm -f $(LIBDIR)/*.o
-
-clean-so:
-	rm -f $(LIBDIR)/*.so
+clean:
+	rm -f *.o
+	rm -f *.so
+	rm -f $(BINFILES)
