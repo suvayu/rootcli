@@ -24,6 +24,9 @@ SOFLAGS      := -shared
 # ROOT compile flags
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 
+# linking to Boost libraries
+BOOSTLIBS    := -lboost_regex
+
 # linking to ROOT
 ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
 ROOFITLIBS   := -lRooFitCore -lRooFit
@@ -74,7 +77,7 @@ BINFILES     =  $(BINSRC:%.cc=%)
 # canned recipes
 #-----------------------------------------------------
 define LINK-LIBS =
-$(LD) $(LDFLAGS) $(SOFLAGS) $(ROOTLIBS) $^ -o $@
+$(LD) $(LDFLAGS) $(SOFLAGS) $(BOOSTLIBS) $(ROOTLIBS) $^ -o $@
 @echo "$@ done"
 endef
 
@@ -94,7 +97,7 @@ libROOTutils.so:	$(LIBOBJF)
 
 # Binaries
 $(BINFILES): %:	%.cc $(LIBFILES)
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(ROOTLIBS) -L$(LIBDIR) -lROOTutils $< -o $@
+	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(BOOSTLIBS) $(ROOTLIBS) -L$(LIBDIR) -lROOTutils $< -o $@
 
 clean:
 	rm -f *.o

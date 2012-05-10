@@ -17,13 +17,14 @@
 #include <string>
 #include <vector>
 
+#include <boost/regex.hpp>
+
 #include <TH1.h>
 #include <TKey.h>
 #include <TClass.h>
 #include <TCollection.h>
 #include <TDirectory.h>
 #include <TString.h>
-#include <TRegexp.h>
 
 
 namespace Hist {
@@ -81,7 +82,7 @@ namespace Hist {
     void getHist(std::string hregex, T* &hist)
     {
       std::vector<T*> histograms;
-      _getHistVec(TRegexp(hregex), histograms, _dir);
+      _getHistVec(boost::regex(hregex), histograms, _dir);
       hist = histograms[0];
       return;
     }
@@ -95,7 +96,7 @@ namespace Hist {
     template <class T>
     void getHistVec(std::string hregex, std::vector<T*> &histograms)
     {
-      _getHistVec(TRegexp(hregex), histograms, _dir);
+      _getHistVec(boost::regex(hregex), histograms, _dir);
       return;
     }
 
@@ -109,7 +110,7 @@ namespace Hist {
      * @param dir Start search in this directory
      */
     template <class T>
-    void _getHistVec(TRegexp hregex, std::vector<T*> &histograms,
+    void _getHistVec(boost::regex hregex, std::vector<T*> &histograms,
 		     TDirectory *dir)
     {
       TIter keylist(dir->GetListOfKeys());
@@ -127,8 +128,8 @@ namespace Hist {
 
 	// get histogram if there is a match
 	if (objClass->InheritsFrom(T::Class())) {
-	  TString keyname(key->GetName());
-	  if (keyname.Contains(hregex)) {
+	  std::string keyname(key->GetName());
+	  if (boost::regex_match(keyname, hregex)) {
 	    histograms.push_back(static_cast<T*>
 				 (key->ReadObjectAny(T::Class())));
 	  }
