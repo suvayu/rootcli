@@ -82,7 +82,12 @@ namespace Hist {
     void getHist(std::string hregex, T* &hist)
     {
       std::vector<T*> histograms;
-      _getHistVec(boost::regex(hregex), histograms, _dir);
+      try {
+	_getHistVec(boost::regex(hregex), histograms, _dir);
+      } catch (boost::regex_error &exc) {
+	std::cerr << "Bad regex: " << hregex << std::endl
+		  << exc.what() << std::endl;
+      }
       hist = histograms[0];
       return;
     }
@@ -96,7 +101,12 @@ namespace Hist {
     template <class T>
     void getHistVec(std::string hregex, std::vector<T*> &histograms)
     {
-      _getHistVec(boost::regex(hregex), histograms, _dir);
+      try {
+	_getHistVec(boost::regex(hregex), histograms, _dir);
+      } catch (boost::regex_error &exc) {
+	std::cerr << "Bad regex: " << hregex << std::endl
+		  << exc.what() << std::endl;
+      }
       return;
     }
 
