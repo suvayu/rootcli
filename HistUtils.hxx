@@ -17,12 +17,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/regex.hpp>
-
 #include <TH1.h>
-#include <TKey.h>
 #include <TClass.h>
-#include <TCollection.h>
 #include <TDirectory.h>
 
 
@@ -75,20 +71,18 @@ namespace Hist {
     /**
      * Return the first histogram matching the regex
      *
+     * Note that the only safe use of this method is when the regex is
+     * an exact match to the object name.
+     *
      * @param hregex Regular expression to match with histogram names
      * @param hist First matching histogram
      */
     template <class T>
     void getHist(std::string hregex, T* &hist)
     {
-      std::vector<T*> histograms;
-      try {
-	_getHistVec(boost::regex(hregex), histograms, _dir);
-      } catch (boost::regex_error &exc) {
-	std::cerr << "Bad regex: " << hregex << std::endl
-		  << exc.what() << std::endl;
-      }
-      hist = histograms[0];
+      std::vector<TObject*> histos;
+      _getHistVec(hregex, histos, _dir, T::Class());
+      hist = dynamic_cast<T*>(histos[0]);
       return;
     }
 
@@ -101,11 +95,10 @@ namespace Hist {
     template <class T>
     void getHistVec(std::string hregex, std::vector<T*> &histograms)
     {
-      try {
-	_getHistVec(boost::regex(hregex), histograms, _dir);
-      } catch (boost::regex_error &exc) {
-	std::cerr << "Bad regex: " << hregex << std::endl
-		  << exc.what() << std::endl;
+      std::vector<TObject*> histos;
+      _getHistVec(hregex, histos, _dir, T::Class());
+      for (unsigned i = 0; i < histos.size(); ++i) {
+	histograms.push_back(dynamic_cast<T*>(histos[i]));
       }
       return;
     }
@@ -116,36 +109,12 @@ namespace Hist {
      * Get a vector of histograms matching the regular expression
      *
      * @param hregex Regular expression to match with histogram names
-     * @param histograms Vector of matching histograms
+     * @param histos Vector of matching histograms
      * @param dir Start search in this directory
+     * @param fclass TClass object for type checking
      */
-    template <class T>
-    void _getHistVec(boost::regex hregex, std::vector<T*> &histograms,
-		     TDirectory *dir)
-    {
-      TIter keylist(dir->GetListOfKeys());
-      TKey *key;
-
-      while ((key = dynamic_cast<TKey*> (keylist()))) {
-	TClass *objClass = TClass::GetClass(key->GetClassName());
-
-	// recurse through subdirectories
-	if (objClass->InheritsFrom(TDirectory::Class())) {
-	  TDirectory *subdir = static_cast<TDirectory*>
-	    (key->ReadObjectAny(TDirectory::Class()));
-	  _getHistVec(hregex, histograms, subdir);
-	}
-
-	// get histogram if there is a match
-	if (objClass->InheritsFrom(T::Class())) {
-	  std::string keyname(key->GetName());
-	  if (boost::regex_match(keyname, hregex)) {
-	    histograms.push_back(static_cast<T*>
-				 (key->ReadObjectAny(T::Class())));
-	  }
-	}
-      }
-    }
+    void _getHistVec(std::string hregex, std::vector<TObject*> &histos,
+		     TDirectory *dir, TClass *fclass);
 
     TDirectory *_dir;		/**< Top level directory to search for histograms */
   };
