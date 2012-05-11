@@ -108,6 +108,10 @@ namespace Hist {
     /**
      * Get a vector of histograms matching the regular expression
      *
+     * This method uses Boost.Regex for the regular expression
+     * matching. This can be troublesome to compile with sucky/obscure
+     * build systems like CMT. In that case use _getHistVec_posix(..).
+     *
      * @param hregex Regular expression to match with histogram names
      * @param histos Vector of matching histograms
      * @param dir Start search in this directory
@@ -115,6 +119,19 @@ namespace Hist {
      */
     void _getHistVec(std::string hregex, std::vector<TObject*> &histos,
 		     TDirectory *dir, TClass *fclass);
+
+    /**
+     * Get a vector of histograms matching the regular expression
+     *
+     * This method uses POSIX regex.h regular expressions.
+     *
+     * @param hregex Regular expression to match with histogram names
+     * @param histos Vector of matching histograms
+     * @param dir Start search in this directory
+     * @param fclass TClass object for type checking
+     */
+    void _getHistVec_posix(std::string hregex, std::vector<TObject*> &histos,
+			   TDirectory *dir, TClass *fclass);
 
     TDirectory *_dir;		/**< Top level directory to search for histograms */
   };
