@@ -50,8 +50,12 @@ namespace Hist {
 
 	int status(0);
 	regex_t regex;
-	if (regcomp(&regex, hregex.c_str(), REG_EXTENDED) != 0) {
-	  std::cout << "Bad regex." << std::endl;
+	if (0 != (status = regcomp(&regex, hregex.c_str(), REG_EXTENDED))) {
+	  int length = regerror(status, &regex, NULL, size_t(0));
+	  char * errmsg = new char[length];
+	  regerror(status, &regex, errmsg, length);
+	  std::cout << "Bad regex: " << errmsg << std::endl;
+	  delete errmsg;
 	} else {
 	  status = regexec(&regex, keyname.c_str(), size_t(0), NULL, 0);
 	  regfree(&regex);
