@@ -24,7 +24,6 @@
 #include <TClass.h>
 #include <TCollection.h>
 #include <TDirectory.h>
-#include <TString.h>
 
 
 namespace Hist {
@@ -45,7 +44,8 @@ namespace Hist {
    * getter methods are templated, so essentially one can also get
    * other ROOT objects.
    *
-   * TODO: Port the regex bits to Boost.Regex or Boost.Xpressive
+   * TODO: Ported regex bits to Boost.Regex. Check if Boost.Xpressive
+   * would be better.
    *
    */
   class HistReader {
