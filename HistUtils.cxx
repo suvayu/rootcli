@@ -55,7 +55,7 @@ namespace Hist {
 	  char * errmsg = new char[length];
 	  regerror(status, &regex, errmsg, length);
 	  std::cout << "Bad regex: " << errmsg << std::endl;
-	  delete errmsg;
+	  delete[] errmsg;
 	} else {
 	  status = regexec(&regex, keyname.c_str(), size_t(0), NULL, 0);
 	  regfree(&regex);
