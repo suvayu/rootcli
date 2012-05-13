@@ -40,8 +40,11 @@ namespace Hist {
    * getter methods are templated, so essentially one can also get
    * other ROOT objects.
    *
-   * TODO: Ported regex bits to Boost.Regex. Check if Boost.Xpressive
-   * would be better.
+   * NOTE: Note that with regex.h a match includes a partial match, so
+   * it is recommended to anchor your regex
+   *
+   * + Anchored regex - ^hperBeetle.*_35_(0|1|2|3)$
+   * + Normal regex - hperBeetle.*_35_(0|1|2|3)
    *
    */
   class HistReader {
