@@ -123,7 +123,12 @@ namespace Hist {
     /**
      * Get a vector of histograms matching the regular expression
      *
-     * This method uses POSIX regex.h regular expressions.
+     * This method uses POSIX regex.h regular expressions. Note that
+     * for this backend a match includes a partial match. Hence it is
+     * recommended to anchor your regular expression.
+     *
+     * + Anchored regex - ^hperBeetle.*_35_(0|1|2|3)$
+     * + Normal regex - hperBeetle.*_35_(0|1|2|3)
      *
      * @param hregex Regular expression to match with histogram names
      * @param histos Vector of matching histograms
