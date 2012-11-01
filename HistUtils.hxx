@@ -48,6 +48,12 @@ namespace Hist {
 
   public:
 
+    /// Regular expression backend
+    enum backend_t {
+      kposix,			/**< Use POSIX regular expressions from regex.h */
+      kBoost			/**< Use regular expressions from Boost.Regex */
+    };
+
     /**
      * Instantiate HistReader with "dir" as the top level directory
      *
@@ -78,10 +84,11 @@ namespace Hist {
      * @param hist First matching histogram
      */
     template <class T>
-    void getHist(std::string hregex, T* &hist)
+    void getHist(std::string hregex, T* &hist,
+		 backend_t backend=HistReader::kBoost)
     {
       std::vector<TObject*> histos;
-      _getHistVec(hregex, histos, _dir, T::Class());
+      _getHistVec(hregex, histos, _dir, T::Class(), backend);
       hist = dynamic_cast<T*>(histos[0]);
       return;
     }
@@ -93,10 +100,17 @@ namespace Hist {
      * @param histograms Vector of matching histograms
      */
     template <class T>
-    void getHistVec(std::string hregex, std::vector<T*> &histograms)
+    void getHistVec(std::string hregex, std::vector<T*> &histograms,
+		    backend_t backend=HistReader::kBoost)
     {
       std::vector<TObject*> histos;
-      _getHistVec(hregex, histos, _dir, T::Class());
+      if (kBoost == backend)
+	_getHistVec(hregex, histos, _dir, T::Class());
+      else if (kposix == backend)
+	_getHistVec_posix(hregex, histos, _dir, T::Class());
+      else
+	// FIXME: Error message goes here
+	return;
       for (unsigned i = 0; i < histos.size(); ++i) {
 	histograms.push_back(dynamic_cast<T*>(histos[i]));
       }
