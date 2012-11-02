@@ -82,13 +82,20 @@ namespace Hist {
      *
      * @param hregex Regular expression to match with histogram names
      * @param hist First matching histogram
+     * @param backend Specify regular expression backend
      */
     template <class T>
     void getHist(std::string hregex, T* &hist,
 		 backend_t backend=HistReader::kBoost)
     {
       std::vector<TObject*> histos;
-      _getHistVec(hregex, histos, _dir, T::Class(), backend);
+      if (kBoost == backend)
+	_getHistVec(hregex, histos, _dir, T::Class());
+      else if (kposix == backend)
+	_getHistVec_posix(hregex, histos, _dir, T::Class());
+      else
+	// FIXME: Error message goes here
+	return;
       hist = dynamic_cast<T*>(histos[0]);
       return;
     }
@@ -98,6 +105,7 @@ namespace Hist {
      *
      * @param hregex Regular expression to match with histogram names
      * @param histograms Vector of matching histograms
+     * @param backend Specify regular expression backend
      */
     template <class T>
     void getHistVec(std::string hregex, std::vector<T*> &histograms,

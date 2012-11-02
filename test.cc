@@ -10,7 +10,7 @@
 
 int main()
 {
-  TFile *file = new TFile("../VeloMoniGui/all-histos-Vetra_histos-2011-2012.root", "read");
+  TFile *file = new TFile("all-histos-Vetra_histos-2011-2012-2.root", "read");
   std::vector<TH2D*> histvec;
 
   Hist::HistReader reader1(file);
