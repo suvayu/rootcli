@@ -53,25 +53,16 @@ TESTDIR      =  $(PROJROOT)/tests
 # project source, object, dictionary and lib filenames
 #-----------------------------------------------------
 # libraries
-LIBS         =
-LIBS         += libROOTutils.so
-
+LIBS         =  libROOTutils.so
 LIBFILES     =  $(LIBS:%=$(LIBDIR)/%)
 
-# libraries with multiple source files need special handling
 # libROOTutils.so
-LIBSRC       =
-LIBSRC       += HistUtils.cxx
-# LIBSRC       += Parsers.cxx
-# LIBSRC       += StyleUtils.cxx
-
+LIBSRC       =  $(wildcard *.cxx)
 LIBOBJF      =  $(LIBSRC:%.cxx=%.o)
 
-# binaries
-BINSRC       =
-BINSRC       += test.cc
-
-BINFILES     =  $(BINSRC:%.cc=%)
+# binaries & tests
+BINS         =  $(wildcard *.cc)
+TESTS        = $(wildcard tests/*.cc)
 
 #-----------------------------------------------------
 # canned recipes
@@ -96,7 +87,11 @@ libROOTutils.so:	$(LIBOBJF)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
 
 # Binaries
-$(BINFILES): %:	%.cc $(LIBFILES)
+$(BINS:%.cc:%): %:	%.cc $(LIBFILES)
+	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(BOOSTLIBS) $(ROOTLIBS) -L$(LIBDIR) -lROOTutils $< -o $@
+
+# tests
+$(TESTS:%.cc=%): %:	%.cc $(LIBFILES)
 	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(BOOSTLIBS) $(ROOTLIBS) -L$(LIBDIR) -lROOTutils $< -o $@
 
 clean:
