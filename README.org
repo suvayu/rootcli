@@ -1,0 +1,11 @@
+# -*- mode: org; -*-
+
+* Introduction
+This package provides some very basic ROOT utilities for the terminal.
+
+1) =rootls= - List contents of ROOT files recursively
+2) =roottree= - Inspect ROOT TTree object from file. subcommands could
+   be:
+   1. =view= - start the tree viewer
+   2. =scan= - print the first few selections from the tree
+   3. =draw= - draw the first few selections from the tree.
