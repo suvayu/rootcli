@@ -1,31 +1,22 @@
-#-----------------------------------------------------
 # shell utilities
-#-----------------------------------------------------
 SHELL        := /bin/bash
 ROOTCONFIG   := root-config
 
-#-----------------------------------------------------
-# compiler flags and options
-#-----------------------------------------------------
-# debug
-ifneq ($(findstring debug, $(strip $(shell $(ROOTCONFIG) --config))),)
-OPT           = -g
-endif
+# compiler, flags, and options
+CC           := $(shell $(ROOTCONFIG) --cc)
+CXX          := $(shell $(ROOTCONFIG) --cxx)
+OPTS         := -g -Wall -fPIC
+CFLAGS       := -c $(OPTS)
 
-# compile with g++
-CXX          := $(shell $(ROOTCONFIG) --cxx) -Wall -fPIC
-CXXFLAGS     := -c $(OPT)
-
-# link
-LD           := $(shell $(ROOTCONFIG) --ld) -Wall -fPIC
-LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags) $(OPT)
-SOFLAGS      := -shared
-
-# ROOT compile flags
-ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
+# linker
+LD           := $(shell $(ROOTCONFIG) --ld)
+LDFLAGS      := $(shell $(ROOTCONFIG) --ldflags) $(OPTS) -shared
 
 # linking to Boost libraries
 BOOSTLIBS    := -lboost_regex
+
+# ROOT compile flags
+ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 
 # linking to ROOT
 ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
@@ -37,64 +28,62 @@ HASTHREAD    := $(shell $(ROOTCONFIG) --has-thread)
 ROOTDICTTYPE := $(shell $(ROOTCONFIG) --dicttype)
 ROOTCINT     := rootcint
 
-#-----------------------------------------------------
-# directories
-#-----------------------------------------------------
-PROJROOT     =  .
-INCDIR       =  $(PROJROOT)
-SRCDIR       =  $(PROJROOT)
-LIBDIR       =  $(PROJROOT)
-BINDIR       =  $(PROJROOT)
-DICTDIR      =  $(PROJROOT)/dict
-DOCDIR       =  $(PROJROOT)/docs
-TESTDIR      =  $(PROJROOT)/tests
-
-#-----------------------------------------------------
-# project source, object, dictionary and lib filenames
-#-----------------------------------------------------
-# libraries
-LIBS         =  libROOTutils.so
-LIBFILES     =  $(LIBS:%=$(LIBDIR)/%)
-
-# libROOTutils.so
-LIBSRC       =  $(wildcard *.cxx)
-LIBOBJF      =  $(LIBSRC:%.cxx=%.o)
-
-# binaries & tests
-BINS         =  $(wildcard *.cc)
-TESTS        = $(wildcard tests/*.cc)
-
-#-----------------------------------------------------
-# canned recipes
-#-----------------------------------------------------
-define LINK-LIBS =
-$(LD) $(LDFLAGS) $(SOFLAGS) $(BOOSTLIBS) $(ROOTLIBS) $^ -o $@
-@echo "$@ done"
-endef
+# sources
+LIBSRC       := $(wildcard *.cxx)
+LIBDEPS      := $(LIBSRC:%.cxx=.deps/%.d)
+BINSRC       := $(wildcard *.cc)
+BINDEPS      := $(BINSRC:%.cc=.deps/%.d)
+TESTS        := $(wildcard tests/*.cc)
+TESTDEPS     := $(TESTS:%.cc=.deps/%.d)
 
 #------------------------------------------------------------------------------
 # Rules
 #------------------------------------------------------------------------------
-.PHONY:		all clean docs
+.PHONY:		all clean distclean
 
-all:		$(LIBFILES) $(BINFILES)
+all:		libROOTutils.so $(BINSRC:%.cc=%)
 
 # libraries
-libROOTutils.so:	$(LIBOBJF)
-	$(LINK-LIBS)
+libROOTutils.so:	$(LIBSRC:%.cxx=%.o)
+	$(LD) $(LDFLAGS) $(BOOSTLIBS) $(ROOTLIBS) $^ -o $@
 
-%.o:	%.cxx
-	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -I$(INCDIR) $< -o $@
+.deps .deps/tests:%:
+	mkdir -p $@
 
-# Binaries
-$(BINS:%.cc:%): %:	%.cc $(LIBFILES)
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(BOOSTLIBS) $(ROOTLIBS) -L$(LIBDIR) -lROOTutils $< -o $@
+$(LIBDEPS):.deps/%.d:	%.cxx | .deps
+	$(CXX) -MM $< -MF $@
 
-# tests
-$(TESTS:%.cc=%): %:	%.cc $(LIBFILES)
-	$(CXX) $(OPT) $(ROOTCFLAGS) -I$(INCDIR) $(BOOSTLIBS) $(ROOTLIBS) -L$(LIBDIR) -lROOTutils $< -o $@
+$(BINDEPS):.deps/%.d:	%.cc | .deps
+	$(CXX) -MM $< -MF $@
+
+# do not include when cleaning
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+-include $(LIBDEPS)
+-include $(BINDEPS)
+endif
+
+$(LIBSRC:%.cxx=%.o):%.o:	%.cxx
+	$(CXX) $(CFLAGS) $(ROOTCFLAGS) $< -o $@
+
+$(BINSRC:%.cc=%):%:	%.cc libROOTutils.so
+	$(CXX) $(OPTS) $(ROOTCFLAGS) $(ROOTLIBS) -L. -lROOTutils $< -o $@
+
+$(TESTDEPS):.deps/%.d:	%.cc | .deps/tests
+	$(CXX) -I. -MM $< -MF $@
+
+# do not include when cleaning
+ifeq ($(findstring clean,$(MAKECMDGOALS)),)
+-include $(TESTDEPS)
+endif
+
+$(TESTS:%.cc=%):%:	%.cc libROOTutils.so
+	$(CXX) $(OPTS) $(ROOTCFLAGS) -I. $(BOOSTLIBS) $(ROOTLIBS) -L. -lROOTutils $< -o $@
+
+$(TESTS:tests/%.cc=%):%:	tests/%
+	@LD_LIBRARY_PATH=. $< $(args)
 
 clean:
-	rm -f *.o
-	rm -f *.so
-	rm -f $(BINFILES)
+	rm -f *.o *.so $(BINSRC:%.cc=%)
+
+distclean:	clean
+	rm -rf .deps/
