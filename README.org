@@ -1,11 +1,56 @@
 # -*- mode: org; -*-
 
-* Introduction
-This package provides some very basic ROOT utilities for the terminal.
+* Overview
+This package provides ROOT utilities in a C++ library
+(=libROOTutils.so=) and as command line programs.
 
-1) =rootls= - List contents of ROOT files recursively
-2) =roottree= - Inspect ROOT TTree object from file. subcommands could
-   be:
-   1. =view= - start the tree viewer
-   2. =scan= - print the first few selections from the tree
-   3. =draw= - draw the first few selections from the tree.
+* CLI specification
+1. =rootls=: =ls= for ROOT files.
+   - Allow loading custom libraries for custom classes (also useful
+     for the other utilities).
+   - List sub-directories, (optionally recursive).
+   - Filter by class name.
+   - Support globbing/regex matching of object names.
+   - Long listing: name, title, size, class, modification time, saved
+     versions (cycles in ROOT jargon).
+   - Verbose mode: also print individual objects.
+2. =roottree=: Inspect a ROOT tree.  Subcommands:
+   - =print=: print the tree.
+   - =view=: start the tree viewer.
+   - =scan=: scan first few selections (optional flag).
+   - =draw=: draw selection from the tree.
+     - Dump eventlists/entrylists to ROOT files.
+     - Print plots.
+   - =copy=: copy specified branches to a new tree (allow selection).
+3. =rootws=: Inspect a RooFit workspace.
+   - =print=:
+   - =draw=:
+
+* Library features
+1. Parsers
+2. Style utilities
+3. I/O utilities
+4. Plotting utilities
+
+* Status [1/19]
+** TODO =rootls= [1/7]
+*** TODO Custom library loader
+*** TODO List sub-directory
+*** TODO Class filter
+*** TODO Globbing
+*** DONE Regex matching
+*** TODO Long listing
+*** TODO Verbose print
+
+** TODO =roottree= [0/7]
+*** TODO Print
+*** TODO View
+*** TODO Scan
+*** TODO Draw [0/2]
+**** TODO Eventlist/entrylist
+**** TODO Plots
+*** TODO Copy/prune/trim
+
+** TODO =rootws= [0/2]
+*** TODO Print
+*** TODO Draw
