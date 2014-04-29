@@ -5,6 +5,7 @@ ROOTCONFIG   := root-config
 # compiler, flags, and options
 CC           := $(shell $(ROOTCONFIG) --cc)
 CXX          := $(shell $(ROOTCONFIG) --cxx)
+CSTD         := -std=c++11
 OPTS         := -g -Wall -fPIC
 CFLAGS       := -c $(OPTS)
 
@@ -51,10 +52,10 @@ libROOTutils.so:	$(LIBSRC:%.cxx=%.o)
 	mkdir -p $@
 
 $(LIBDEPS):.deps/%.d:	%.cxx | .deps
-	$(CXX) -MM $< -MF $@
+	$(CXX) $(CSTD) -MM $< -MF $@
 
 $(BINDEPS):.deps/%.d:	%.cc | .deps
-	$(CXX) -MM $< -MF $@
+	$(CXX) $(CSTD) -MM $< -MF $@
 
 # do not include when cleaning
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
@@ -63,13 +64,13 @@ ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 endif
 
 $(LIBSRC:%.cxx=%.o):%.o:	%.cxx
-	$(CXX) $(CFLAGS) $(ROOTCFLAGS) $< -o $@
+	$(CXX) $(CSTD) $(CFLAGS) $(ROOTCFLAGS) $< -o $@
 
 $(BINSRC:%.cc=%):%:	%.cc libROOTutils.so
-	$(CXX) $(OPTS) $(ROOTCFLAGS) $(ROOTLIBS) -L. -lROOTutils $< -o $@
+	$(CXX) $(OPTS) $(CSTD) $(ROOTCFLAGS) $(ROOTLIBS) -L. -lROOTutils $< -o $@
 
 $(TESTDEPS):.deps/%.d:	%.cc | .deps/tests
-	$(CXX) -I. -MM $< -MF $@
+	$(CXX) $(CSTD) -I. -MM $< -MF $@
 
 # do not include when cleaning
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
@@ -77,7 +78,7 @@ ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 endif
 
 $(TESTS:%.cc=%):%:	%.cc libROOTutils.so
-	$(CXX) $(OPTS) $(ROOTCFLAGS) -I. $(BOOSTLIBS) $(ROOTLIBS) -L. -lROOTutils $< -o $@
+	$(CXX) $(OPTS) $(CSTD) $(ROOTCFLAGS) -I. $(BOOSTLIBS) $(ROOTLIBS) -L. -lROOTutils $< -o $@
 
 $(TESTS:tests/%.cc=%):%:	tests/%
 	@LD_LIBRARY_PATH=. $< $(args)
