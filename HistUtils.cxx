@@ -1,7 +1,4 @@
 #include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
 
 // for POSIX regex
 #include <sys/types.h>
@@ -9,9 +6,7 @@
 
 #include <boost/regex.hpp>
 
-#include <TKey.h>
-#include <TCollection.h>
-
+#include "FileUtils.hxx"
 #include "HistUtils.hxx"
 
 
@@ -35,32 +30,22 @@ namespace Hist {
 			       std::vector<TObject*> &histos,
 			       TDirectory *dir, TClass *fclass)
   {
-    TIter keylist(dir->GetListOfKeys());
-    TKey *key;
+    auto regex_match_obj_p =
+      [hregex](TKey *key, std::vector<TObject*> &histos) {
+      std::string keyname(key->GetName());
 
-    while ((key = dynamic_cast<TKey*> (keylist()))) {
-      TClass *objClass = TClass::GetClass(key->GetClassName());
-
-      // recurse through subdirectories
-      if (objClass->InheritsFrom(TDirectory::Class())) {
-	TDirectory *subdir = dynamic_cast<TDirectory*>(key->ReadObj());
-	_getHistVec(hregex, histos, subdir, fclass);
-      }
-
-      // get histogram if there is a match
-      if (objClass->InheritsFrom(fclass)) {
-	std::string keyname(key->GetName());
-
-	try {
-	  if (boost::regex_match(keyname, boost::regex(hregex))) {
-	    histos.push_back(key->ReadObj());
-	  }
-	} catch (boost::regex_error &exc) {
-	  std::cerr << "Bad regex: " << hregex << std::endl
-		    << exc.what() << std::endl;
+      try {
+	if (boost::regex_match(keyname, boost::regex(hregex))) {
+	  // get histogram if there is a match
+	  histos.push_back(key->ReadObj());
 	}
+      } catch (boost::regex_error &exc) {
+	std::cerr << "Bad regex: " << hregex << std::endl
+	<< exc.what() << std::endl;
       }
-    }
+    };
+
+    File::recurse_thru_dir(dir, fclass, regex_match_obj_p, histos);
     return;
   }
 
@@ -69,20 +54,8 @@ namespace Hist {
 				     std::vector<TObject*> &histos,
 				     TDirectory *dir, TClass *fclass)
   {
-    TIter keylist(dir->GetListOfKeys());
-    TKey *key;
-
-    while ((key = dynamic_cast<TKey*> (keylist()))) {
-      TClass *objClass = TClass::GetClass(key->GetClassName());
-
-      // recurse through subdirectories
-      if (objClass->InheritsFrom(TDirectory::Class())) {
-	TDirectory *subdir = dynamic_cast<TDirectory*>(key->ReadObj());
-	_getHistVec(hregex, histos, subdir, fclass);
-      }
-
-      // get histogram if there is a match
-      if (objClass->InheritsFrom(fclass)) {
+    auto regex_match_obj_p =
+      [hregex](TKey *key, std::vector<TObject*> &histos) {
 	std::string keyname(key->GetName());
 
 	int status(0);
@@ -98,12 +71,13 @@ namespace Hist {
 	  regfree(&regex);
 
 	  if (not status) {
+	    // get histogram if there is a match
 	    histos.push_back(key->ReadObj());
 	  }
 	}
-      }
-    }
+      };
 
+    File::recurse_thru_dir(dir, fclass, regex_match_obj_p, histos);
     return;
   }
 }
