@@ -6,7 +6,7 @@
 
 #include <boost/regex.hpp>
 
-#include "FileUtils.hxx"
+#include "IOUtils.hxx"
 #include "HistUtils.hxx"
 
 
@@ -45,7 +45,7 @@ namespace Hist {
       }
     };
 
-    File::recurse_thru_dir(dir, fclass, regex_match_obj_p, histos);
+    IO::recurse_thru_dir(dir, fclass, regex_match_obj_p, histos);
     return;
   }
 
@@ -77,7 +77,7 @@ namespace Hist {
 	}
       };
 
-    File::recurse_thru_dir(dir, fclass, regex_match_obj_p, histos);
+    IO::recurse_thru_dir(dir, fclass, regex_match_obj_p, histos);
     return;
   }
 }

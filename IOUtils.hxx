@@ -1,5 +1,5 @@
 /**
- * @file   FileUtils.hxx
+ * @file   IOUtils.hxx
  * @author Suvayu Ali <Suvayu.Ali@cern.ch>
  * @date   Mon Apr 28 18:47:50 2014
  *
@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __FILEUTILS_HXX
-#define __FILEUTILS_HXX
+#ifndef __IOUTILS_HXX
+#define __IOUTILS_HXX
 
 #include <vector>
 #include <functional>
@@ -18,7 +18,7 @@
 #include <TDirectory.h>
 
 
-namespace File{
+namespace IO{
   // typedef void (* obj_p_t) (TKey *, std::vector<TObject*> &);
   typedef std::function<void (TKey *, std::vector<TObject*> &)> obj_p_t;
 
@@ -26,4 +26,4 @@ namespace File{
 			std::vector<TObject*> &obj_vec);
 }
 
-#endif	// __FILEUTILS_HXX
+#endif	// __IOUTILS_HXX

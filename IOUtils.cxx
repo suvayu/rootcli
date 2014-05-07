@@ -1,9 +1,9 @@
 #include <TCollection.h>
 
-#include "FileUtils.hxx"
+#include "IOUtils.hxx"
 
 
-namespace File {
+namespace IO {
   void recurse_thru_dir(TDirectory *dir, TClass *fclass, obj_p_t obj_p,
 			std::vector<TObject*> &obj_vec)
   {
@@ -20,7 +20,7 @@ namespace File {
       }
 
       // call predicate if not a directory (iow, regular object)
-      if (objClass->InheritsFrom(fclass)) {
+      if ((not fclass) or objClass->InheritsFrom(fclass)) {
 	obj_p(key, obj_vec);
       }
     }
